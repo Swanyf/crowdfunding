@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+			  PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+			  "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+
+	<context id="atguiguTables" targetRuntime="MyBatis3Simple" defaultModelType="flat">
+		<commentGenerator>
+			<!-- 是否去除自动生成的注释 true:是;false:否 -->
+			<property name="suppressAllComments" value="true" />
+		</commentGenerator>
+
+		<!--数据库连接的信息：驱动类、连接地址、用户名、密码 -->
+		<jdbcConnection driverClass="com.mysql.jdbc.Driver"
+			connectionURL="jdbc:mysql://localhost:3306/product" userId="root"
+			password="654321">
+		</jdbcConnection>
+
+		<!-- 默认false，把JDBC DECIMAL 和 NUMERIC 类型解析为 Integer，为 true时把JDBC DECIMAL 
+			和 NUMERIC 类型解析为java.math.BigDecimal -->
+		<javaTypeResolver>
+			<property name="forceBigDecimals" value="false" />
+		</javaTypeResolver>
+
+		<!-- 
+			javaModelGenerator 生成表对应的javaBean
+			targetPackage 属性设置生成的类的包名
+			targetProject 属性设置生成的工程的路径    一般生成为当前工程。写为 .\
+		-->
+		<javaModelGenerator targetProject=".\src\main\java"
+			targetPackage="com.swan.seconddemo.bean">
+			<!-- enableSubPackages:是否让schema作为包的后缀 -->
+			<property name="enableSubPackages" value="false" />
+			<!-- 从数据库返回的值被清理前后的空格 -->
+			<property name="trimStrings" value="true" />
+		</javaModelGenerator>
+
+		<!-- 
+			sqlMapGenerator 生成表对应的sql的xml配置文件
+			targetPackage 属性设置生成的sql配置文件的包名
+			targetProject XxxMapper.xml映射文件生成的路径    一般生成为当前工程。写为 .\		
+	 	-->
+		<sqlMapGenerator targetProject=".\src\main\java"
+			targetPackage="com.swan.seconddemo.mapper">
+			<!-- enableSubPackages:是否让schema作为包的后缀 -->
+			<property name="enableSubPackages" value="false" />
+		</sqlMapGenerator>
+
+		<!-- 
+			javaClientGenerator 生成mybatis客户端的代码 ===dao或mapper之类(增删改查的业务接口方法)
+			targetPackage 属性设置生成的mybatis的调用代码，比如mapper之类的接口
+			targetProject Mapper接口生成的位置    一般生成为当前工程。写为 .\	
+		 -->
+		<javaClientGenerator type="XMLMAPPER"
+			targetProject=".\src\main\java" targetPackage="com.swan.seconddemo.mapper">
+			<!-- enableSubPackages:是否让schema作为包的后缀 -->
+			<property name="enableSubPackages" value="false" />
+		</javaClientGenerator>
+
+		<!-- 
+			数据库表名字和我们的entity类对应的映射指定
+			table 配置哪些表需要我们映射生成java代码
+			tableName 			是表名
+			domainObjectName	是javaBean名
+		-->
+		<table tableName="user_info" domainObjectName="UserInfo" />
+
+	</context>
+</generatorConfiguration>

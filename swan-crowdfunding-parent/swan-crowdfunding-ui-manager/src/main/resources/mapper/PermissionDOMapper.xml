@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.swan.crowdfunding.component.mapper.PermissionDOMapper">
+	<resultMap id="BaseResultMap" type="com.swan.crowdfunding.entity.PermissionDO">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="pid" property="pid" jdbcType="INTEGER" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="icon" property="icon" jdbcType="VARCHAR" />
+		<result column="url" property="url" jdbcType="VARCHAR" />
+	</resultMap>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from t_permission
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="com.swan.crowdfunding.entity.PermissionDO">
+		insert into t_permission (id, pid, name,
+		icon, url)
+		values (#{id,jdbcType=INTEGER}, #{pid,jdbcType=INTEGER},
+		#{name,jdbcType=VARCHAR},
+		#{icon,jdbcType=VARCHAR}, #{url,jdbcType=VARCHAR})
+	</insert>
+	<update id="updateByPrimaryKey" parameterType="com.swan.crowdfunding.entity.PermissionDO">
+		update t_permission
+		set
+		name = #{name,jdbcType=VARCHAR},
+		icon = #{icon,jdbcType=VARCHAR},
+		url = #{url,jdbcType=VARCHAR}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select id, pid, name, icon, url
+		from t_permission
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<select id="selectAll" resultMap="BaseResultMap">
+		select id, pid, name, icon, url
+		from t_permission
+	</select>
+
+	<!-- 根据roleId查询已分配的许可的id-list -->
+	<select id="getPermissionIdListByRoleId" resultType="Integer">
+		select permissionId from t_role_permission
+		where roleId = #{roleId}
+	</select>
+
+	<!-- 根据roleId删除已分配的许可数据 -->
+	<delete id="delOldPermissionListByRoleId">
+		delete from t_role_permission where roleId = #{roleId}
+	</delete>
+
+	<!-- 给roleId新增添加的许可数据 -->
+	<insert id="insertNewPermission">
+		insert into t_role_permission(roleId,permissionId)
+		values
+		<foreach collection="permissionIdList" item="permissionId"
+			separator=",">(#{roleId},#{permissionId})</foreach>
+	</insert>
+
+	<select id="getPermissionsByUserId" resultMap="BaseResultMap">
+		SELECT p.id,`name`,url,pid
+		FROM t_permission p
+		LEFT JOIN t_role_permission rp ON p.id=rp.permissionid
+		LEFT JOIN t_user_role ur ON rp.roleid=ur.roleid
+		where ur.userid=#{userId}
+	</select>
+	
+
+</mapper>

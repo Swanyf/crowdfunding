@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+
+	<!-- 引入数据库文件 -->
+	<context:property-placeholder location="classpath:jdbc.properties" />
+
+	<!-- 配置自动扫描包 -->
+	<context:component-scan base-package="com.swan.crowdfunding.component.service.impl"/>
+
+	<!-- 配置数据库连接 -->
+	<bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource">
+		<property name="username" value="${jdbc.user}" />
+		<property name="password" value="${jdbc.password}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="driverClassName" value="${jdbc.driver}" />
+		<!-- 配置初始化大小、最小、最大 -->
+		<property name="initialSize" value="${jdbc.initialSize}" />
+		<property name="minIdle" value="${jdbc.minIdle}" />
+		<property name="maxActive" value="${jdbc.maxActive}" />
+
+		<!-- 配置获取连接等待超时的时间 -->
+		<property name="maxWait" value="${jdbc.maxWait}" />
+
+		<!-- 配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒 -->
+		<property name="timeBetweenEvictionRunsMillis" value="${jdbc.timeBetweenEvictionRunsMillis}" />
+
+		<!-- 配置一个连接在池中最小生存的时间，单位是毫秒 -->
+		<property name="minEvictableIdleTimeMillis" value="${jdbc.minEvictableIdleTimeMillis}" />
+
+		<property name="testWhileIdle" value="${jdbc.testWhileIdle}" />
+	</bean>
+
+	<!-- 配置SqlSessionFactoryBean -->
+	<!-- SqlSessionFactor yBean实现了FactoryBean接口，所以这里配置的bean返回的对象是SqlSessionFactory的对象 -->
+	<!-- SqlSessionFactoryBean将创建SqlSessionFactory对象的繁琐细节进行了封装和屏蔽 -->
+	<bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- 装配数据源 -->
+		<property name="dataSource" ref="dataSource" />
+
+		<!-- 指定MyBatis配置文件位置 -->
+		<property name="configLocation" value="classpath:mybatis-config.xml" />
+
+		<!-- 配置Mapper配置文件路径 -->
+		<property name="mapperLocations" value="classpath:mapper/*Mapper.xml"></property>
+
+		<property name="plugins">
+			<list>
+				<!-- 装配PageHelper插件 -->
+				<bean class="com.github.pagehelper.PageHelper">
+					<!-- 为PageHelper插件设置属性 -->
+					<property name="properties">
+						<props>
+							<!-- 设置数据库方言，让PageHelper能够知道当前使用的数据库 -->
+							<!-- 从而能够根据具体的数据库，生成SQL语句中分页相关的部分 -->
+							<prop key="dialect">mysql</prop>
+							<!-- 将前台页面传入的页码修正到1~总页数之间的范围 -->
+							<prop key="reasonable">true</prop>
+						</props>
+					</property>
+				</bean>
+			</list>
+		</property>
+
+	</bean>
+
+	<!-- 为Mapper接口的扫描器指定Mapper接口所在包 -->
+	<!-- 将Mapper接口生成代理注入到Spring -->
+	<bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<!-- 指定Mapper接口所在的包 -->
+		<property name="basePackage" value="com.swan.crowdfunding.component.mapper" />
+	</bean>
+
+	<!-- 配置声明式事务 -->
+	<!-- 配置事务管理器 -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<!-- 装配数据源 -->
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+
+	<!-- 配置事务切面的切入点表达式 -->
+	<aop:config>
+		<aop:pointcut expression="execution(* *..*Service.*(..))"
+			id="txPointCut" />
+		<!-- 将切入点表达式和事务通知配置关联起来 -->
+		<aop:advisor advice-ref="txAdvice" pointcut-ref="txPointCut" />
+	</aop:config>
+
+	<!-- 配置事务通知属性 -->
+	<tx:advice id="txAdvice" transaction-manager="transactionManager">
+		<tx:attributes>
+			<!-- tx:method 给某个方法配置事务属性 name就是方法的匹配规则（方法名） 精确匹配 -->
+			<!-- 查询设置为只读，增删改默认为false -->
+			<tx:method name="get*" read-only="true" />
+			<tx:method name="list*" read-only="true" />
+			<tx:method name="count*" read-only="true" />
+
+			<!-- rollback-for属性：指定事务回滚的异常 -->
+			<!-- propagation属性：事务的传播行为 -->
+			<!-- REQUIRED：当前方法必须运行在事务中，但如果当前线程上已经开启了事务，则在当前事务中运行 -->
+			<!-- REQUIRES_NEW：当前方法必须运行在事务中，而且一定要开启一个新事务，在自己的事务中运行。避免在共用事务时其他方法操作失败导致当前方法回滚。 -->
+			<tx:method name="remove*" rollback-for="java.lang.Exception"
+				propagation="REQUIRES_NEW" />
+			<tx:method name="save*" rollback-for="java.lang.Exception"
+				propagation="REQUIRES_NEW" />
+			<tx:method name="update*" rollback-for="java.lang.Exception"
+				propagation="REQUIRES_NEW" />
+		</tx:attributes>
+	</tx:advice>
+</beans>

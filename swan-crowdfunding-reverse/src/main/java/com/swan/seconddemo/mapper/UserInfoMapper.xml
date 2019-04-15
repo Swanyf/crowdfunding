@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.swan.seconddemo.mapper.UserInfoMapper" >
+  <resultMap id="BaseResultMap" type="com.swan.seconddemo.bean.UserInfo" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="login_name" property="loginName" jdbcType="VARCHAR" />
+    <result column="nick_name" property="nickName" jdbcType="VARCHAR" />
+    <result column="passwd" property="passwd" jdbcType="VARCHAR" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="phone_num" property="phoneNum" jdbcType="VARCHAR" />
+    <result column="email" property="email" jdbcType="VARCHAR" />
+    <result column="head_img" property="headImg" jdbcType="VARCHAR" />
+    <result column="user_level" property="userLevel" jdbcType="VARCHAR" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from user_info
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <insert id="insert" parameterType="com.swan.seconddemo.bean.UserInfo" >
+    insert into user_info (id, login_name, nick_name, 
+      passwd, name, phone_num, 
+      email, head_img, user_level
+      )
+    values (#{id,jdbcType=BIGINT}, #{loginName,jdbcType=VARCHAR}, #{nickName,jdbcType=VARCHAR}, 
+      #{passwd,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, #{phoneNum,jdbcType=VARCHAR}, 
+      #{email,jdbcType=VARCHAR}, #{headImg,jdbcType=VARCHAR}, #{userLevel,jdbcType=VARCHAR}
+      )
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.swan.seconddemo.bean.UserInfo" >
+    update user_info
+    set login_name = #{loginName,jdbcType=VARCHAR},
+      nick_name = #{nickName,jdbcType=VARCHAR},
+      passwd = #{passwd,jdbcType=VARCHAR},
+      name = #{name,jdbcType=VARCHAR},
+      phone_num = #{phoneNum,jdbcType=VARCHAR},
+      email = #{email,jdbcType=VARCHAR},
+      head_img = #{headImg,jdbcType=VARCHAR},
+      user_level = #{userLevel,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select id, login_name, nick_name, passwd, name, phone_num, email, head_img, user_level
+    from user_info
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select id, login_name, nick_name, passwd, name, phone_num, email, head_img, user_level
+    from user_info
+  </select>
+</mapper>
